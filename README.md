@@ -1,6 +1,6 @@
 # buffr
 
-FIXME: Write a one-line description of your library/project.
+Buffr is an in-progress audio webapp made with ClojureScript and the WebAudio API. 
 
 ## Overview
 

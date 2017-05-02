@@ -35,6 +35,8 @@
 
 (def audio-source (.createBufferSource ctx)) ;; the node which contains the buffer and plays it
 
+(def gain (.createGain ctx)) ;; a volume node! for volume!
+
 (defonce white-noise-buffer (js/Float32Array. (into-array (repeatedly length #(rand 1)))))
 ;; all AudioBuffers must implement the Float32Array interface.
 ;; This array contains 22050 samples of random values between 0 and 1.
@@ -50,8 +52,17 @@
 
 (set! (.-loop audio-source) true) ;; Set the loop conditional to true (it is natively false)
 
-(.connect audio-source (.-destination ctx)) ;; Connect the audio graph
+; (.connect audio-source gain)
 
+;(.connect audio-source (.-destination ctx)) ;; Connect the audio graph
+
+                                        ; (.connect mic (.-destination ctx))
+
+(defn mic-connect [mic-node] (.connect mic-node (.-destination ctx)))
+
+(defn mic-handler [stream] (mic-connect (.createMediaStreamSource ctx stream)))
+
+(js/navigator.mediaDevices.getUserMedia {:audio true} s2 js/console.warn)
 (.start audio-source) ;; hell yeah, we've got some sound
 
 (defonce app-state (atom {:text "Hello world!"}))
