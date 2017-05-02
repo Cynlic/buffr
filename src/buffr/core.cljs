@@ -54,15 +54,14 @@
 
 ; (.connect audio-source gain)
 
-;(.connect audio-source (.-destination ctx)) ;; Connect the audio graph
+; (.connect audio-source (.-destination ctx)) ;; Connect the audio graph
 
-                                        ; (.connect mic (.-destination ctx))
 
 (defn mic-connect [mic-node] (.connect mic-node (.-destination ctx)))
 
 (defn mic-handler [stream] (mic-connect (.createMediaStreamSource ctx stream)))
 
-(js/navigator.mediaDevices.getUserMedia {:audio true} s2 js/console.warn)
+(js/navigator.mediaDevices.getUserMedia {:audio true} mic-handler js/console.warn)
 (.start audio-source) ;; hell yeah, we've got some sound
 
 (defonce app-state (atom {:text "Hello world!"}))
