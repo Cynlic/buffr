@@ -39,6 +39,48 @@
 
 (def a-mic (atom 0))  ;; this is an atom which evetually is assigned the value of the user's microphone MediaStreamSource object. It is needed to prevent garbage collection issues with Firefox.
 
+;; Visualization code. Here there be dragons.
+
+(def analyser (.createAnalyser ctx)) ;; Analyser to see fft information, etc
+
+(set! (.-fftSize analyser) 2048)
+
+(def buffer-length (.-frequencyBinCount analyser))
+
+(def data-array (js/Uint8Array. buffer-length))
+
+(def canvas (js/document.getElementById "tutorial")) ;; potentially useful for drawing objects to the application page (FFT stuff, etc)
+
+(def c-ctx (.getContext canvas "2d")) ;; same as above
+
+(def stupid (atom 0))
+
+;(.getByteTimeDomainData analyser data-array)
+
+(defn draw-canvas []
+            (let [canvas-c (js/document.getElementById "tutorial")
+                  ctx (.getContext canvas "2d")
+                  sliceWidth (* (.-width canvas-c) (/ 1.0 buffer-length))
+                  y (for [x (range 0 buffer-length)
+                          :let [v (/ (aget data-array (- buffer-length 1)) 128.0)
+                                y (/ (* v (.-height canvas-c)) 2)]]
+                      y)]
+              (reset! stupid (js/requestAnimationFrame draw-canvas))
+              (.getByteTimeDomainData analyser data-array)
+              (set! (.-fillStyle ctx) "rgb(0, 200, 200)")
+              (.fillRect ctx 0 0 (.-width canvas-c) (.-height canvas-c))
+              (set! (.-lineWidth ctx) 4)
+              (set! (.-strokeStyle ctx) "rgb(0,0,0)")
+              (.beginPath ctx)
+              (dotimes [n buffer-length ]
+                (if (= n 0)
+                  (.moveTo ctx (* n sliceWidth) (nth y n))
+                  (.lineTo ctx (* n sliceWidth) (nth y n))))
+               (.lineTo ctx (.-width canvas-c) (/ (.-height canvas-c) 2))
+              (.stroke ctx)))
+
+;; end visuals
+
 (defonce white-noise-buffer (js/Float32Array. (into-array (repeatedly length #(rand 1)))))
 ;; all AudioBuffers must implement the Float32Array interface.
 ;; This array contains 22050 samples of random values between 0 and 1.
@@ -56,10 +98,12 @@
 
 (.connect gain (.-destination ctx))
 
+(.connect analyser gain)
+
 (set! (.-value (.-gain gain)) 1)
 
 (defn mic-connect "This function just patches any audio-in to the gain. Because why not?"
-  [mic-node] (.connect mic-node gain))
+  [mic-node] (.connect mic-node analyser))
 
 (defn mic-handler
   "Saves an atomic refrence to the microphone node to prevent garbage collection as well as connecting the reference to the output.This function is a callback, to be used on the js/Promise returned by getUserMedia. Once it is called, a-mic should be manipulatable as an audio node, but using atomic syntax."
@@ -83,6 +127,9 @@
 (promise-handler (js/navigator.mediaDevices.getUserMedia
                   (clj->js {:audio true})) mic-handler)
 ;; Imperatively connect up the microphone. Move this into a reagent component as soon as possible.
+
+(draw-canvas)
+
 
 (defonce app-state (atom {:text "Hello world!"}))
 
