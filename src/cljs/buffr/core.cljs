@@ -1,7 +1,15 @@
 (ns buffr.core
-  (:require ))
+    (:require [reagent.core :as reagent]
+              [re-frame.core :as re-frame]
+              [buffr.events]
+              [buffr.subs]
+              [buffr.views :as views]
+              [buffr.config :as config]))
 
-(enable-console-print!)
+;;*******************************************************************************
+;; Copy and Paste
+;;*******************************************************************************
+
 
 ;; ***************************************
 ;; * Application Code for /buffr/ by A&H *
@@ -18,6 +26,7 @@
 ;; noise is generated. This may be due to some kind of frequency cancelation where the noise
 ;; actually layered, not replaced...
 
+(enable-console-print!)
 
 (defn make-context
   "Creates an audio context -- to be used with global state atom ctx."
@@ -138,3 +147,23 @@
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
 )
+
+;;*******************************************************************************
+;; End Popy & Paste
+;;*******************************************************************************
+
+
+(defn dev-setup []
+  (when config/debug?
+    (enable-console-print!)
+    (println "dev mode")))
+
+(defn mount-root []
+  (re-frame/clear-subscription-cache!)
+  (reagent/render [views/main-panel]
+                  (.getElementById js/document "app")))
+
+(defn ^:export init []
+  (re-frame/dispatch-sync [:initialize-db])
+  (dev-setup)
+  (mount-root))

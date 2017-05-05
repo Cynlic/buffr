@@ -1,39 +1,36 @@
 # buffr
 
-Buffr is an in-progress audio webapp made with ClojureScript and the WebAudio API. 
+A [re-frame](https://github.com/Day8/re-frame) application designed to ... well, that part is up to you.
 
-## Overview
+## Development Mode
 
-FIXME: Write a paragraph about the library/project and highlight its goals.
+### Start Cider from Emacs:
 
-## Setup
+Put this in your Emacs config file:
 
-To get an interactive development environment run:
+```
+(setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
+```
 
-    lein figwheel
+Navigate to a clojurescript file and start a figwheel REPL with `cider-jack-in-clojurescript` or (`C-c M-J`)
 
-and open your browser at [localhost:3449](http://localhost:3449/).
-This will auto compile and send all changes to the browser without the
-need to reload. After the compilation process is complete, you will
-get a Browser Connected REPL. An easy way to try it is:
+### Run application:
 
-    (js/alert "Am I connected?")
+```
+lein clean
+lein figwheel dev
+```
 
-and you should see an alert in the browser window.
+Figwheel will automatically push cljs changes to the browser.
 
-To clean all compiled files:
+Wait a bit, then browse to [http://localhost:3449](http://localhost:3449).
 
-    lein clean
+## Production Build
 
-To create a production build run:
 
-    lein do clean, cljsbuild once min
+To compile clojurescript to javascript:
 
-And open your browser in `resources/public/index.html`. You will not
-get live reloading, nor a REPL. 
-
-## License
-
-Copyright © 2014 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
+```
+lein clean
+lein cljsbuild once min
+```
