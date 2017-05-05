@@ -30,6 +30,8 @@
 (def length 22050) ;; length of the buffer
 
 (def buf (.createBuffer ctx 1 length 44100))
+
+(def tes-buffer-length (* 44100 5))
 ;; Create the buffer to assign to our AudioSource.
 ;; Note the WebAudio pattern of using AudioContext's member functions to construct various objects
 
@@ -55,29 +57,27 @@
 
 (def stupid (atom 0))
 
-;(.getByteTimeDomainData analyser data-array)
-
 (defn draw-canvas []
-            (let [canvas-c (js/document.getElementById "tutorial")
-                  ctx (.getContext canvas "2d")
-                  sliceWidth (* (.-width canvas-c) (/ 1.0 buffer-length))
-                  y (for [x (range 0 buffer-length)
-                          :let [v (/ (aget data-array (- buffer-length 1)) 128.0)
-                                y (/ (* v (.-height canvas-c)) 2)]]
-                      y)]
-              (reset! stupid (js/requestAnimationFrame draw-canvas))
-              (.getByteTimeDomainData analyser data-array)
-              (set! (.-fillStyle ctx) "rgb(0, 200, 200)")
-              (.fillRect ctx 0 0 (.-width canvas-c) (.-height canvas-c))
-              (set! (.-lineWidth ctx) 4)
-              (set! (.-strokeStyle ctx) "rgb(0,0,0)")
-              (.beginPath ctx)
-              (dotimes [n buffer-length ]
-                (if (= n 0)
-                  (.moveTo ctx (* n sliceWidth) (nth y n))
-                  (.lineTo ctx (* n sliceWidth) (nth y n))))
-               (.lineTo ctx (.-width canvas-c) (/ (.-height canvas-c) 2))
-              (.stroke ctx)))
+  (let [canvas-c (js/document.getElementById "tutorial")
+        ctx (.getContext canvas "2d")
+        sliceWidth (* (.-width canvas-c) (/ 1.0 buffer-length))
+        y (for [x (range 0 buffer-length)
+                :let [v (/ (aget data-array (- buffer-length 1)) 128.0)
+                      y (/ (* v (.-height canvas-c)) 2)]]
+            y)]
+    (reset! stupid (js/requestAnimationFrame draw-canvas))
+    (.getByteTimeDomainData analyser data-array)
+    (set! (.-fillStyle ctx) "rgb(0, 200, 200)")
+    (.fillRect ctx 0 0 (.-width canvas-c) (.-height canvas-c))
+    (set! (.-lineWidth ctx) 4)
+    (set! (.-strokeStyle ctx) "rgb(0,0,0)")
+    (.beginPath ctx)
+    (dotimes [n buffer-length ]
+      (if (= n 0)
+        (.moveTo ctx (* n sliceWidth) (nth y n))
+        (.lineTo ctx (* n sliceWidth) (nth y n))))
+    (.lineTo ctx (.-width canvas-c) (/ (.-height canvas-c) 2))
+    (.stroke ctx)))
 
 ;; end visuals
 
